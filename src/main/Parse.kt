@@ -1,14 +1,15 @@
 package lispy
 
 fun String.parseProgram(): Expr {
-    // currently presumes single numeric string
-    return tokenize().first().parseLiteral()
+    return tokenize().first().parseLongLiteral()
 }
 
-fun String.parseLiteral(): Expr.Literal {
-    return Expr.Literal(this.toInt())
-}
+fun String.parseLongLiteral() = Expr.LongLiteral(this.toInt())
+fun String.parseDoubleLiteral() = Expr.DoubleLiteral(this.toDouble())
+fun String.parseSymbol() = Expr.Symbol(this)
 
-fun String.tokenize(): Sequence<String> {
-    return splitToSequence(" ").filter { it.isNotEmpty() }
-}
+fun String.tokenize(): Sequence<String> = this
+    .replace("(", " ( ")
+    .replace(")", " ) ")
+    .splitToSequence(" ", "\n", "\t")
+    .filter { it.isNotEmpty() }
