@@ -28,15 +28,25 @@ fun String.parseProgram(): Expr {
 fun String.parseLongNumeric() = LongNumeric(this.toInt())
 fun String.parseDoubleNumeric() = DoubleNumeric(this.toDouble())
 fun String.parseSymbol() = Symbol(this)
-fun String.parseAtom(): Expr {
-    try {
-        return this.parseLongNumeric()
-    } catch (e: NumberFormatException) {}
-    try {
-        return this.parseDoubleNumeric()
-    } catch (e: NumberFormatException) {}
-    return this.parseSymbol()
-}
+
+internal val literalConstants = mapOf(
+    "nil" to Expr.Nil,
+    "#t" to Expr.Boolean.True,
+    "#f" to Expr.Boolean.False
+)
+
+fun String.parseAtom(): Expr =
+    literalConstants.getOrElse(this) {
+        try {
+            return this.parseLongNumeric()
+        } catch (e: NumberFormatException) {
+        }
+        try {
+            return this.parseDoubleNumeric()
+        } catch (e: NumberFormatException) {
+        }
+        return this.parseSymbol()
+    }
 
 fun String.tokenize(): List<String> = this
     .replace("(", " ( ")

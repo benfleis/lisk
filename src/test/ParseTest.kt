@@ -50,8 +50,9 @@ internal class ParseTest {
         " (  )\t\n" to "()",
         "1 2 3" to "1",                     // reminder: program is only first expression
         "(1 2 3)" to "(1 2 3)",
-        "(+ 1 2)" to "(+ 1 2)"
-    ).map { (input, expected) ->
+        "(+ 1 2)" to "(+ 1 2)",
+        "(+ (+ 1 2) (- 4 2))" to "(+ (+ 1 2) (- 4 2))"
+        ).map { (input, expected) ->
         DynamicTest.dynamicTest("program | parse | generate : $input -> $expected") {
             assertEquals(expected, input.parseProgram().generate())
         }

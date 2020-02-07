@@ -16,6 +16,15 @@ sealed class Expr {
     abstract fun generate(): String
 
     // Atoms
+    object Nil : Expr() {
+        override fun generate(): String = "nil"
+    }
+
+    sealed class Boolean(val bool: kotlin.Boolean) : Expr() {
+        object True : Expr.Boolean(true) { override fun generate(): String = "#t" }
+        object False : Expr.Boolean(false) { override fun generate(): String = "#f" }
+    }
+
     data class LongNumeric(val long: Int) : Expr() {
         override fun generate(): String = "$long"
     }
@@ -30,6 +39,7 @@ sealed class Expr {
         operator fun plus(expr: Expr): Expr.List = Expr.List(this.list.plus(expr))
         override fun generate(): String = list.joinToString(prefix = "(", separator = " ", postfix = ")", transform = Expr::generate)
     }
+
     // currently callable via KCallable, which like java uses Array for varargs. Future consideration to use List for
     // natural iteration.
     // Q: should this be an Expr?
@@ -46,6 +56,8 @@ fun Expr.evalIn(env: Env): Expr =
     when (this) {
         is Expr.LongNumeric -> this
         is Expr.DoubleNumeric -> this
+        is Expr.Nil -> this
+        is Expr.Boolean -> this
         is Expr.Symbol -> env.find(name) ?: throw InvalidNameException("Symbol not found: $name")
         is Expr.List -> this.evalIn(env)
         // uneval-able Exprs below all throw exception, and should only occur due to bug / internal error
@@ -56,7 +68,7 @@ fun Expr.List.evalIn(env: Env): Expr {
     if (this.list.isEmpty()) { throw Exception("Eval empty list impossible") }
     val proc = this.list.first().evalIn(env)
     return when (proc) {
-        is Expr.Procedure -> proc.callable.call(list.subList(1, list.size).map { it.evalIn(env) }.toTypedArray())
+        is Expr.Procedure -> proc.callable.call(env, list.subList(1, list.size).map { it.evalIn(env) }.toTypedArray())
         else -> throw Exception("Eval list head must be procedure")
     }
 }

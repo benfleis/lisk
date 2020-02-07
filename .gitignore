@@ -2,3 +2,4 @@ lib
 out
 .idea
 lisk.iml
+*.tmp

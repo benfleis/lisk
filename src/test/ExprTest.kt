@@ -1,13 +1,14 @@
 package lispy
 
 import kotlin.test.*
+import lispy.Expr.*
 import org.junit.jupiter.api.*
 
 internal class ExprTest {
     val emptyEnv = Env(null, mutableMapOf())
-    val lit1 = Expr.LongNumeric(1)
-    val lit1_0 = Expr.DoubleNumeric(1.0)
-    val sym = Expr.Symbol("sym")
+    val lit1 = LongNumeric(1)
+    val lit1_0 = DoubleNumeric(1.0)
+    val sym = Symbol("sym")
 
     @Test
     fun test_long_numeric_evalIn() {
@@ -26,5 +27,14 @@ internal class ExprTest {
         assertFails { sym.evalIn(emptyEnv) }
         val symEnv = Env(null, mutableMapOf(Pair("sym", lit1)))
         assertEquals(lit1, sym.evalIn(symEnv))
+    }
+
+    @Test
+    fun test_nested_math() {
+        val env = Env(null, mutableMapOf())
+        env.registerBuiltins()
+        assertEquals(
+            LongNumeric(10),
+            "(+ (+ 1 2 (+ 0) (- 3)) (+ 3 4 (+) (- (- 3))))".parseProgram().evalIn(env))
     }
 }
