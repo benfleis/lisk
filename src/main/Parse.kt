@@ -16,13 +16,38 @@ fun String.parseProgram(): Expr {
                     l.add(parseTokens(tokens))
                 }
                 tokens.removeAt(0)  // trailing ")"
-                return List(l)
+                return l.toForm()
             }
             ")" -> throw IllegalArgumentException("Unexpected closing parenthesis")
             else -> token.parseAtom()
         }
     }
     return parseTokens(programTokens)
+}
+
+fun MutableList<Expr>.toForm(): Expr {
+    val size = this.size
+    if (isEmpty()) return List(this)
+    val first = this.first()
+    if (first is Symbol) {
+        when (first.name) {
+            "begin" -> {
+                if (size < 2) { throw Exception("Begin must have at least 1 arg") }
+                return Form.Begin(this.drop(1))
+            }
+            "if" -> {
+                if (size < 3 || size > 4) throw IllegalArgumentException("Incorrect number of args")
+                return Form.If(get(1), get(2), if (this.size == 4) get(3) else null)
+            }
+            "define" -> {
+                if (size != 3) throw IllegalArgumentException("define requires 2 arguments")
+                val second = get(1)
+                if (second !is Symbol) throw java.lang.IllegalArgumentException("define requires symbol as first arg")
+                return Form.Define(second, get(2))
+            }
+        }
+    }
+    return List(this)
 }
 
 fun String.parseLongNumeric() = LongNumeric(this.toInt())

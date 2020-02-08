@@ -5,10 +5,16 @@ import kotlin.test.*
 import org.junit.jupiter.api.*
 
 internal class BuiltinsTest {
+    fun getEval(): (String) -> Expr {
+        val env = Env(null, mutableMapOf())
+        env.registerBuiltinProcedures()
+        return { it.parseProgram().evalIn(env) }
+    }
+
     @Test
     fun test_add() {
         val env = Env(null, mutableMapOf())
-        env.registerBuiltins()
+        env.registerBuiltinProcedures()
 
         // basic longs and arities
         assertEquals(LongNumeric(0), "(+)".parseProgram().evalIn(env))
@@ -36,7 +42,7 @@ internal class BuiltinsTest {
     @Test
     fun test_multiply() {
         val env = Env(null, mutableMapOf())
-        env.registerBuiltins()
+        env.registerBuiltinProcedures()
 
         // basic longs and arities
         assertEquals(LongNumeric(1), "(*)".parseProgram().evalIn(env))
@@ -65,7 +71,7 @@ internal class BuiltinsTest {
     @Test
     fun test_subtract() {
         val env = Env(null, mutableMapOf())
-        env.registerBuiltins()
+        env.registerBuiltinProcedures()
 
         // basic longs and arities
         assertEquals(LongNumeric(0), "(-)".parseProgram().evalIn(env))
@@ -93,7 +99,7 @@ internal class BuiltinsTest {
     @Test
     fun test_divide() {
         val env = Env(null, mutableMapOf())
-        env.registerBuiltins()
+        env.registerBuiltinProcedures()
 
         // basic longs and arities
         assertEquals(LongNumeric(1), "(/)".parseProgram().evalIn(env))
@@ -119,9 +125,25 @@ internal class BuiltinsTest {
     }
 
     @Test
+    fun test_begin() {
+        val eval = getEval()
+
+        assertFails { eval("(begin)") }
+        // confirm simple
+        assertEquals(LongNumeric(1), eval("(begin 1)"))
+        // confirm last
+        assertEquals(LongNumeric(1), eval("(begin (+ 1 2 3) 1)"))
+        // confirm eval ordering
+        assertEquals(LongNumeric(1), eval("(begin (define one 2) (define one 1) one)"))
+
+        assertEquals("(begin 1)", "(begin 1)".parseProgram().generate())
+        assertEquals("(begin 1 2 3)", "(begin 1 2 3)".parseProgram().generate())
+    }
+
+    @Test
     fun test_if() {
         val env = Env(null, mutableMapOf())
-        env.registerBuiltins()
+        env.registerBuiltinProcedures()
         fun String.eval() = this.parseProgram().evalIn(env)
 
         assertEquals(Expr.Boolean.True, "(if #t #t #f)".eval())
@@ -137,5 +159,18 @@ internal class BuiltinsTest {
         assertFails { "(if)".eval() }
         assertFails { "(if 1)".eval() }
         assertFails { "(if 1 2 3 4)".eval() }
+    }
+
+    @Test
+    fun test_define() {
+        val eval = getEval()
+
+        assertFails { eval("one") }
+        assertEquals(Nil, eval("(define one 1)"))
+        assertEquals(LongNumeric(1), eval("one"))
+        assertEquals(Nil, eval("(define one 2)"))
+        assertEquals(LongNumeric(2), eval("one"))
+        assertEquals(Nil, eval("(define one 1)"))
+        assertEquals(LongNumeric(3), eval("(+ one 1 one)"))
     }
 }

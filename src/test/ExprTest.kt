@@ -32,7 +32,7 @@ internal class ExprTest {
     @Test
     fun test_nested_math() {
         val env = Env(null, mutableMapOf())
-        env.registerBuiltins()
+        env.registerBuiltinProcedures()
         assertEquals(
             LongNumeric(10),
             "(+ (+ 1 2 (+ 0) (- 3)) (+ 3 4 (+) (- (- 3))))".parseProgram().evalIn(env))
