@@ -77,10 +77,10 @@ fun divide(env: Env, vararg args: Expr): Expr = when {
 }
 
 fun Env.registerBuiltinProcedures() {
-    update("+", Procedure(::add))
-    update("*", Procedure(::multiply))
-    update("-", Procedure(::subtract))
-    update("/", Procedure(::divide))
+    update("+", Callable(::add))
+    update("*", Callable(::multiply))
+    update("-", Callable(::subtract))
+    update("/", Callable(::divide))
 }
 
 // Special Forms -- arg eval handled within the form, differs from Procedures above

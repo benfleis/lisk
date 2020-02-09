@@ -62,7 +62,7 @@ sealed class Expr {
             if (list.isEmpty()) { throw Exception("Eval empty list impossible") }
             val proc = list.first().eval(env)
             return when (proc) {
-                is Expr.Procedure -> proc.callable.call(env, list.subList(1, list.size).map { it.eval(env) }.toTypedArray())
+                is Expr.Callable -> proc.callable.call(env, list.subList(1, list.size).map { it.eval(env) }.toTypedArray())
                 else -> throw Exception("Eval list head must be procedure")
             }
         }
@@ -73,7 +73,7 @@ sealed class Expr {
     // Q: should this be an Expr?
     // A: (for now) yes, as it still sits naturally in the resolved tree structure.
     // Alternative idea: List gets eval'd into a bound procedure. How does curry'ing fit into that?
-    data class Procedure(val callable: KCallable<Expr>): Expr() {
+    data class Callable(val callable: KCallable<Expr>): Expr() {
         override fun toCode(): String = "<procedure>"
         override fun eval(env: Env): Expr = throw IllegalCallerException("Procedure can only be eval'd from List")
     }
