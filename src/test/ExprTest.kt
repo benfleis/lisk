@@ -12,21 +12,21 @@ internal class ExprTest {
 
     @Test
     fun test_long_numeric_evalIn() {
-        assertEquals(lit1, lit1.evalIn(emptyEnv))
-        assertEquals("1", lit1.evalIn(emptyEnv).generate())
+        assertEquals(lit1, lit1.eval(emptyEnv))
+        assertEquals("1", lit1.eval(emptyEnv).toCode())
     }
 
     @Test
     fun test_double_numeric_evalIn() {
-        assertEquals(lit1_0, lit1_0.evalIn(emptyEnv))
-        assertEquals("1.0", lit1_0.evalIn(emptyEnv).generate()) // sketchy w/ double/floats; 1.0 should suffice in base2
+        assertEquals(lit1_0, lit1_0.eval(emptyEnv))
+        assertEquals("1.0", lit1_0.eval(emptyEnv).toCode()) // sketchy w/ double/floats; 1.0 should suffice in base2
     }
 
     @Test
     fun test_symbol_evalIn() {
-        assertFails { sym.evalIn(emptyEnv) }
+        assertFails { sym.eval(emptyEnv) }
         val symEnv = Env(null, mutableMapOf(Pair("sym", lit1)))
-        assertEquals(lit1, sym.evalIn(symEnv))
+        assertEquals(lit1, sym.eval(symEnv))
     }
 
     @Test
@@ -35,6 +35,6 @@ internal class ExprTest {
         env.registerBuiltinProcedures()
         assertEquals(
             LongNumeric(10),
-            "(+ (+ 1 2 (+ 0) (- 3)) (+ 3 4 (+) (- (- 3))))".parseProgram().evalIn(env))
+            "(+ (+ 1 2 (+ 0) (- 3)) (+ 3 4 (+) (- (- 3))))".parseProgram().eval(env))
     }
 }

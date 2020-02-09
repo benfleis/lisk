@@ -88,13 +88,13 @@ fun Env.registerBuiltinProcedures() {
 fun ifThenElse(env: Env, predicate: Expr, consequent: Expr, alternate: Expr?): Expr =
     when (alternate) {
         null -> ifThenElse(env, predicate, consequent, Nil)
-        else -> if (predicate.evalIn(env) != Expr.Boolean.False) { consequent.evalIn(env) } else { alternate.evalIn(env) }
+        else -> if (predicate.eval(env) != Expr.Boolean.False) { consequent.eval(env) } else { alternate.eval(env) }
     }
 
 // define one 1 -> Nil, and sets Env `one` string to LongNumeric(1)
 fun define(env: Env, vararg args: Expr): Nil = Nil.also {
     when (args.size) {
-        2 -> env.update((args[0] as Symbol).name, args[1].evalIn(env))
+        2 -> env.update((args[0] as Symbol).name, args[1].eval(env))
         else -> throw IllegalArgumentException("Incorrect number of arguments")
     }
 }

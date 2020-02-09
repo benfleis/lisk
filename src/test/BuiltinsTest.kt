@@ -8,7 +8,7 @@ internal class BuiltinsTest {
     fun getEval(): (String) -> Expr {
         val env = Env(null, mutableMapOf())
         env.registerBuiltinProcedures()
-        return { it.parseProgram().evalIn(env) }
+        return { it.parseProgram().eval(env) }
     }
 
     @Test
@@ -17,26 +17,26 @@ internal class BuiltinsTest {
         env.registerBuiltinProcedures()
 
         // basic longs and arities
-        assertEquals(LongNumeric(0), "(+)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(1), "(+ 1)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(2), "(+ 1 1)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(6), "(+ 1 2 3)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(55), "(+ 1 2 3 4 5 6 7 8 9 10)".parseProgram().evalIn(env))
+        assertEquals(LongNumeric(0), "(+)".parseProgram().eval(env))
+        assertEquals(LongNumeric(1), "(+ 1)".parseProgram().eval(env))
+        assertEquals(LongNumeric(2), "(+ 1 1)".parseProgram().eval(env))
+        assertEquals(LongNumeric(6), "(+ 1 2 3)".parseProgram().eval(env))
+        assertEquals(LongNumeric(55), "(+ 1 2 3 4 5 6 7 8 9 10)".parseProgram().eval(env))
 
         // basic doubles
-        assertEquals(DoubleNumeric(1.0), "(+ 1.0)".parseProgram().evalIn(env))
-        assertEquals(DoubleNumeric(2.0), "(+ 1.0 1.0)".parseProgram().evalIn(env))
+        assertEquals(DoubleNumeric(1.0), "(+ 1.0)".parseProgram().eval(env))
+        assertEquals(DoubleNumeric(2.0), "(+ 1.0 1.0)".parseProgram().eval(env))
 
         // confirm double casting
-        assertEquals(DoubleNumeric(2.0), "(+ 1.0 1)".parseProgram().evalIn(env))
-        assertEquals(DoubleNumeric(2.0), "(+ 1 1.0)".parseProgram().evalIn(env))
+        assertEquals(DoubleNumeric(2.0), "(+ 1.0 1)".parseProgram().eval(env))
+        assertEquals(DoubleNumeric(2.0), "(+ 1 1.0)".parseProgram().eval(env))
 
         // oops
-        assertFails { "(+ a)".parseProgram().evalIn(env) }
-        assertFails { "(+ 1 a)".parseProgram().evalIn(env) }
-        assertFails { "(+ a 1)".parseProgram().evalIn(env) }
-        assertFails { "(+ 1 a 1)".parseProgram().evalIn(env) }
-        assertFails { "(+ 1 1 a)".parseProgram().evalIn(env) }
+        assertFails { "(+ a)".parseProgram().eval(env) }
+        assertFails { "(+ 1 a)".parseProgram().eval(env) }
+        assertFails { "(+ a 1)".parseProgram().eval(env) }
+        assertFails { "(+ 1 a 1)".parseProgram().eval(env) }
+        assertFails { "(+ 1 1 a)".parseProgram().eval(env) }
     }
 
     @Test
@@ -45,26 +45,26 @@ internal class BuiltinsTest {
         env.registerBuiltinProcedures()
 
         // basic longs and arities
-        assertEquals(LongNumeric(1), "(*)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(1), "(* 1)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(3), "(* 3 1)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(6), "(* 1 2 3)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(3628800), "(* 1 2 3 4 5 6 7 8 9 10)".parseProgram().evalIn(env))
+        assertEquals(LongNumeric(1), "(*)".parseProgram().eval(env))
+        assertEquals(LongNumeric(1), "(* 1)".parseProgram().eval(env))
+        assertEquals(LongNumeric(3), "(* 3 1)".parseProgram().eval(env))
+        assertEquals(LongNumeric(6), "(* 1 2 3)".parseProgram().eval(env))
+        assertEquals(LongNumeric(3628800), "(* 1 2 3 4 5 6 7 8 9 10)".parseProgram().eval(env))
 
         // basic doubles
-        assertEquals(DoubleNumeric(2.0), "(* 2.0)".parseProgram().evalIn(env))
-        assertEquals(DoubleNumeric(8.0), "(* 2.0 4.0)".parseProgram().evalIn(env))
+        assertEquals(DoubleNumeric(2.0), "(* 2.0)".parseProgram().eval(env))
+        assertEquals(DoubleNumeric(8.0), "(* 2.0 4.0)".parseProgram().eval(env))
 
         // confirm double casting
-        assertEquals(DoubleNumeric(2.0), "(* 1.0 2)".parseProgram().evalIn(env))
-        assertEquals(DoubleNumeric(2.0), "(* 1 2.0)".parseProgram().evalIn(env))
+        assertEquals(DoubleNumeric(2.0), "(* 1.0 2)".parseProgram().eval(env))
+        assertEquals(DoubleNumeric(2.0), "(* 1 2.0)".parseProgram().eval(env))
 
         // oops
-        assertFails { "(* a)".parseProgram().evalIn(env) }
-        assertFails { "(* 1 a)".parseProgram().evalIn(env) }
-        assertFails { "(* a 1)".parseProgram().evalIn(env) }
-        assertFails { "(* 1 a 1)".parseProgram().evalIn(env) }
-        assertFails { "(* 1 1 a)".parseProgram().evalIn(env) }
+        assertFails { "(* a)".parseProgram().eval(env) }
+        assertFails { "(* 1 a)".parseProgram().eval(env) }
+        assertFails { "(* a 1)".parseProgram().eval(env) }
+        assertFails { "(* 1 a 1)".parseProgram().eval(env) }
+        assertFails { "(* 1 1 a)".parseProgram().eval(env) }
     }
 
 
@@ -74,26 +74,26 @@ internal class BuiltinsTest {
         env.registerBuiltinProcedures()
 
         // basic longs and arities
-        assertEquals(LongNumeric(0), "(-)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(-1), "(- 1)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(0), "(- 1 1)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(-4), "(- 1 2 3)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(-53), "(- 1 2 3 4 5 6 7 8 9 10)".parseProgram().evalIn(env))
+        assertEquals(LongNumeric(0), "(-)".parseProgram().eval(env))
+        assertEquals(LongNumeric(-1), "(- 1)".parseProgram().eval(env))
+        assertEquals(LongNumeric(0), "(- 1 1)".parseProgram().eval(env))
+        assertEquals(LongNumeric(-4), "(- 1 2 3)".parseProgram().eval(env))
+        assertEquals(LongNumeric(-53), "(- 1 2 3 4 5 6 7 8 9 10)".parseProgram().eval(env))
 
         // basic doubles
-        assertEquals(DoubleNumeric(-1.0), "(- 1.0)".parseProgram().evalIn(env))
-        assertEquals(DoubleNumeric(0.0), "(- 1.0 1.0)".parseProgram().evalIn(env))
+        assertEquals(DoubleNumeric(-1.0), "(- 1.0)".parseProgram().eval(env))
+        assertEquals(DoubleNumeric(0.0), "(- 1.0 1.0)".parseProgram().eval(env))
 
         // confirm double casting
-        assertEquals(DoubleNumeric(0.0), "(- 1.0 1)".parseProgram().evalIn(env))
-        assertEquals(DoubleNumeric(0.0), "(- 1 1.0)".parseProgram().evalIn(env))
+        assertEquals(DoubleNumeric(0.0), "(- 1.0 1)".parseProgram().eval(env))
+        assertEquals(DoubleNumeric(0.0), "(- 1 1.0)".parseProgram().eval(env))
 
         // oops
-        assertFails { "(- a)".parseProgram().evalIn(env) }
-        assertFails { "(- 1 a)".parseProgram().evalIn(env) }
-        assertFails { "(- a 1)".parseProgram().evalIn(env) }
-        assertFails { "(- 1 a 1)".parseProgram().evalIn(env) }
-        assertFails { "(- 1 1 a)".parseProgram().evalIn(env) }
+        assertFails { "(- a)".parseProgram().eval(env) }
+        assertFails { "(- 1 a)".parseProgram().eval(env) }
+        assertFails { "(- a 1)".parseProgram().eval(env) }
+        assertFails { "(- 1 a 1)".parseProgram().eval(env) }
+        assertFails { "(- 1 1 a)".parseProgram().eval(env) }
     }
 
     @Test
@@ -102,26 +102,26 @@ internal class BuiltinsTest {
         env.registerBuiltinProcedures()
 
         // basic longs and arities
-        assertEquals(LongNumeric(1), "(/)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(1), "(/ 1)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(3), "(/ 6 2)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(3), "(/ 12 2 2)".parseProgram().evalIn(env))
-        assertEquals(LongNumeric(0), "(/ 1 2 3 4 5 6 7 8 9 10)".parseProgram().evalIn(env))
+        assertEquals(LongNumeric(1), "(/)".parseProgram().eval(env))
+        assertEquals(LongNumeric(1), "(/ 1)".parseProgram().eval(env))
+        assertEquals(LongNumeric(3), "(/ 6 2)".parseProgram().eval(env))
+        assertEquals(LongNumeric(3), "(/ 12 2 2)".parseProgram().eval(env))
+        assertEquals(LongNumeric(0), "(/ 1 2 3 4 5 6 7 8 9 10)".parseProgram().eval(env))
 
         // basic doubles
-        assertEquals(DoubleNumeric(1.0), "(/ 1.0)".parseProgram().evalIn(env))
-        assertEquals(DoubleNumeric(2.0), "(/ 1.0 0.5)".parseProgram().evalIn(env))
+        assertEquals(DoubleNumeric(1.0), "(/ 1.0)".parseProgram().eval(env))
+        assertEquals(DoubleNumeric(2.0), "(/ 1.0 0.5)".parseProgram().eval(env))
 
         // confirm double casting
-        assertEquals(DoubleNumeric(0.5), "(/ 0.5 1)".parseProgram().evalIn(env))
-        assertEquals(DoubleNumeric(0.5), "(/ 1 2.0)".parseProgram().evalIn(env))
+        assertEquals(DoubleNumeric(0.5), "(/ 0.5 1)".parseProgram().eval(env))
+        assertEquals(DoubleNumeric(0.5), "(/ 1 2.0)".parseProgram().eval(env))
 
         // oops
-        assertFails { "(/ a)".parseProgram().evalIn(env) }
-        assertFails { "(/ 1 a)".parseProgram().evalIn(env) }
-        assertFails { "(/ a 1)".parseProgram().evalIn(env) }
-        assertFails { "(/ 1 a 1)".parseProgram().evalIn(env) }
-        assertFails { "(/ 1 1 a)".parseProgram().evalIn(env) }
+        assertFails { "(/ a)".parseProgram().eval(env) }
+        assertFails { "(/ 1 a)".parseProgram().eval(env) }
+        assertFails { "(/ a 1)".parseProgram().eval(env) }
+        assertFails { "(/ 1 a 1)".parseProgram().eval(env) }
+        assertFails { "(/ 1 1 a)".parseProgram().eval(env) }
     }
 
     @Test
@@ -136,15 +136,15 @@ internal class BuiltinsTest {
         // confirm eval ordering
         assertEquals(LongNumeric(1), eval("(begin (define one 2) (define one 1) one)"))
 
-        assertEquals("(begin 1)", "(begin 1)".parseProgram().generate())
-        assertEquals("(begin 1 2 3)", "(begin 1 2 3)".parseProgram().generate())
+        assertEquals("(begin 1)", "(begin 1)".parseProgram().toCode())
+        assertEquals("(begin 1 2 3)", "(begin 1 2 3)".parseProgram().toCode())
     }
 
     @Test
     fun test_if() {
         val env = Env(null, mutableMapOf())
         env.registerBuiltinProcedures()
-        fun String.eval() = this.parseProgram().evalIn(env)
+        fun String.eval() = this.parseProgram().eval(env)
 
         assertEquals(Expr.Boolean.True, "(if #t #t #f)".eval())
         assertEquals(Expr.Boolean.False, "(if #f #t #f)".eval())
@@ -178,7 +178,7 @@ internal class BuiltinsTest {
     fun test_quote() {
         val env = Env(null, mutableMapOf())
         env.registerBuiltinProcedures()
-        val eval = { s: String -> s.parseProgram().evalIn(env) }
+        val eval = { s: String -> s.parseProgram().eval(env) }
         val plus: Expr = env.find("+") ?: throw AssertionError("env missing +")
 
         assertFails { eval("(quote)") }

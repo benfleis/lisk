@@ -23,7 +23,7 @@ internal class ParseTest {
     @Test
     fun test_parse_long_numeric() {
         val lit1 = "1".parseLongNumeric()
-        assertEquals("1", lit1.generate())
+        assertEquals("1", lit1.toCode())
 
         // 1.0 should fail to parse as Long
         assertFails { "1.0".parseLongNumeric() }
@@ -32,13 +32,13 @@ internal class ParseTest {
     @Test
     fun test_parse_double_numeric() {
         val lit1_0 = "1.0".parseDoubleNumeric()
-        assertEquals("1.0", lit1_0.generate())
+        assertEquals("1.0", lit1_0.toCode())
     }
 
     @Test
     fun test_parse_list() {
         val list123 = "( 1 2 3 ) ".parseProgram()
-        assertEquals("(1 2 3)", list123.generate())
+        assertEquals("(1 2 3)", list123.toCode())
     }
 
     @TestFactory
@@ -54,7 +54,7 @@ internal class ParseTest {
         "(+ (+ 1 2) (- 4 2))" to "(+ (+ 1 2) (- 4 2))"
         ).map { (input, expected) ->
         DynamicTest.dynamicTest("program | parse | generate : $input -> $expected") {
-            assertEquals(expected, input.parseProgram().generate())
+            assertEquals(expected, input.parseProgram().toCode())
         }
     }
 }
