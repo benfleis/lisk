@@ -106,5 +106,10 @@ sealed class Expr {
                 return Nil
             }
         }
+
+        data class Quote(val expr: Expr): Expr() {
+            override fun generate(): String = "(quote ${expr.generate()}"
+            override fun evalIn(env: Env): Expr = expr
+        }
     }
 }

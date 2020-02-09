@@ -173,4 +173,19 @@ internal class BuiltinsTest {
         assertEquals(Nil, eval("(define one 1)"))
         assertEquals(LongNumeric(3), eval("(+ one 1 one)"))
     }
+
+    @Test
+    fun test_quote() {
+        val env = Env(null, mutableMapOf())
+        env.registerBuiltinProcedures()
+        val eval = { s: String -> s.parseProgram().evalIn(env) }
+        val plus: Expr = env.find("+") ?: throw AssertionError("env missing +")
+
+        assertFails { eval("(quote)") }
+        assertFails { eval("(quote 1 2)") }
+        assertEquals(LongNumeric(1), eval("(quote 1)"))
+        assertNotEquals(
+            Expr.List(mutableListOf(plus, LongNumeric(1), LongNumeric(2))),
+            eval("(quote (+ 1 2))"))
+    }
 }

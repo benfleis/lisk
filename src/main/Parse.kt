@@ -32,7 +32,7 @@ fun MutableList<Expr>.toForm(): Expr {
     if (first is Symbol) {
         when (first.name) {
             "begin" -> {
-                if (size < 2) { throw Exception("Begin must have at least 1 arg") }
+                if (size < 2) { throw Exception("Begin requires at least 1 arg") }
                 return Form.Begin(this.drop(1))
             }
             "if" -> {
@@ -40,10 +40,14 @@ fun MutableList<Expr>.toForm(): Expr {
                 return Form.If(get(1), get(2), if (this.size == 4) get(3) else null)
             }
             "define" -> {
-                if (size != 3) throw IllegalArgumentException("define requires 2 arguments")
+                if (size != 3) throw IllegalArgumentException("define requires 2 args")
                 val second = get(1)
                 if (second !is Symbol) throw java.lang.IllegalArgumentException("define requires symbol as first arg")
                 return Form.Define(second, get(2))
+            }
+            "quote" -> {
+                if (size != 2) throw IllegalArgumentException("quote requires 1 arg")
+                return Form.Quote(get(1))
             }
         }
     }

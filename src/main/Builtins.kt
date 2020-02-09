@@ -98,4 +98,3 @@ fun define(env: Env, vararg args: Expr): Nil = Nil.also {
         else -> throw IllegalArgumentException("Incorrect number of arguments")
     }
 }
-
