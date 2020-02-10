@@ -1,11 +1,12 @@
 package lispy
 
 import lispy.Expr.*
+import lispy.Expr.Boolean.*
 import kotlin.test.*
 import org.junit.jupiter.api.*
 
 internal class BuiltinsTest {
-    fun getEval(): (String) -> Expr {
+    private fun getEval(): (String) -> Expr {
         val env = Env(null, mutableMapOf())
         env.registerBuiltinProcedures()
         return { it.parseProgram().eval(env) }
@@ -146,11 +147,11 @@ internal class BuiltinsTest {
         env.registerBuiltinProcedures()
         fun String.eval() = this.parseProgram().eval(env)
 
-        assertEquals(Expr.Boolean.True, "(if #t #t #f)".eval())
-        assertEquals(Expr.Boolean.False, "(if #f #t #f)".eval())
+        assertEquals(True, "(if #t #t #f)".eval())
+        assertEquals(False, "(if #f #t #f)".eval())
         assertEquals(LongNumeric(2), "(if 1 2 3)".eval())
-        assertEquals(Expr.Boolean.True, "(if (if #t #t) #t #f)".eval())
-        assertEquals(Expr.Boolean.True, "(if (if #f #f) #t #f)".eval())
+        assertEquals(True, "(if (if #t #t) #t #f)".eval())
+        assertEquals(True, "(if (if #f #f) #t #f)".eval())
 
         assertEquals(LongNumeric(3), "(if (if #t #t) (+ 1 2) (+ 3 4))".eval())
         assertEquals(LongNumeric(7), "(if (if #t #f) (+ 1 2) (+ 3 4))".eval())
@@ -179,13 +180,35 @@ internal class BuiltinsTest {
         val env = Env(null, mutableMapOf())
         env.registerBuiltinProcedures()
         val eval = { s: String -> s.parseProgram().eval(env) }
-        val plus: Expr = env.find("+") ?: throw AssertionError("env missing +")
+
+        val plus = Symbol("+")
+        val one = 1L.toLongExpr()
+        val two_0 = 2.0.toDoubleExpr()
 
         assertFails { eval("(quote)") }
         assertFails { eval("(quote 1 2)") }
-        assertEquals(LongNumeric(1), eval("(quote 1)"))
-        assertNotEquals(
-            Expr.List(mutableListOf(plus, LongNumeric(1), LongNumeric(2))),
-            eval("(quote (+ 1 2))"))
+        assertEquals(one, eval("(quote 1)"))
+        assertEquals(List(mutableListOf(plus, one, two_0)), eval("(quote (+ 1 2.0))"))
+    }
+
+    @Test
+    fun test_lte() {
+        val eval = getEval()
+
+        assertFails { eval("(<=)") }
+        assertFails { eval("(<= 1)") }
+        assertFails { eval("(<= nil 1)")}
+        assertFails { eval("(<= 1 <=)")}
+
+        assertEquals(True, eval("(<= 0 1)"))
+        assertEquals(True, eval("(<= 0 1 2)"))
+        assertEquals(True, eval("(<= 0 1.0 2)"))
+        assertEquals(True, eval("(<= 0 0 1.0 1.0 2 2 2)"))
+        assertEquals(True, eval("(<= (- 1) 1.0 3 5.0)"))
+
+        assertEquals(False, eval("(<= 1 0)"))
+        assertEquals(False, eval("(<= 0 1 0)"))
+        assertEquals(False, eval("(<= 0 1 0.0 2)"))
+        assertEquals(False, eval("(<= 1 0.0 0 2)"))
     }
 }

@@ -41,6 +41,33 @@ internal fun divide2(a: Expr, b: Expr): Expr =
         else -> throw IllegalArgumentException("Procedure received non-Numeric argument")
     }
 
+// classic compare(a, b) -> { lt -> -1, eq -> 0, gt -> 1 }
+internal fun compare(a: Expr, b: Expr): Int =
+    when {
+        a is LongNumeric && b is LongNumeric -> when {
+            a.long < b.long -> -1
+            a.long > b.long -> 1
+            else -> 0
+        }
+        else -> {
+            val aDbl = when (a) {
+                is LongNumeric -> a.long.toDouble()
+                is DoubleNumeric -> a.double
+                else -> throw IllegalArgumentException("Procedure received non-Numeric argument")
+            }
+            val bDbl = when (b) {
+                is LongNumeric -> b.long.toDouble()
+                is DoubleNumeric -> b.double
+                else -> throw IllegalArgumentException("Procedure received non-Numeric argument")
+            }
+            when {
+                aDbl < bDbl -> -1
+                aDbl > bDbl -> 1
+                else -> 0
+            }
+        }
+    }
+
 internal fun negate(expr: Expr): Expr =
     when (expr) {
         is LongNumeric -> LongNumeric(-expr.long)
@@ -76,25 +103,16 @@ fun divide(env: Env, vararg args: Expr): Expr = when {
     else -> args.asSequence().drop(1).fold(args[0], ::divide2)
 }
 
+fun lessThanOrEqual(env: Env, vararg args: Expr): Expr.Boolean = when {
+    args.size == 2 -> compare(args[0], args[1]) <= 0
+    args.size < 2 -> throw IllegalArgumentException("Incorrect number of arguments")
+    else -> (args zip args.drop(1)).find { compare(it.first, it.second) > 0 } == null
+}.toBooleanExpr()
+
 fun Env.registerBuiltinProcedures() {
     update("+", Callable(::add))
     update("*", Callable(::multiply))
     update("-", Callable(::subtract))
     update("/", Callable(::divide))
-}
-
-// Special Forms -- arg eval handled within the form, differs from Procedures above
-
-fun ifThenElse(env: Env, predicate: Expr, consequent: Expr, alternate: Expr?): Expr =
-    when (alternate) {
-        null -> ifThenElse(env, predicate, consequent, Nil)
-        else -> if (predicate.eval(env) != Expr.Boolean.False) { consequent.eval(env) } else { alternate.eval(env) }
-    }
-
-// define one 1 -> Nil, and sets Env `one` string to LongNumeric(1)
-fun define(env: Env, vararg args: Expr): Nil = Nil.also {
-    when (args.size) {
-        2 -> env.update((args[0] as Symbol).name, args[1].eval(env))
-        else -> throw IllegalArgumentException("Incorrect number of arguments")
-    }
+    update("<=", Callable(::lessThanOrEqual))
 }

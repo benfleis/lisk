@@ -39,7 +39,7 @@ sealed class Expr {
         }
     }
 
-    data class LongNumeric(val long: Int) : Expr() {
+    data class LongNumeric(val long: Long) : Expr() {
         override fun eval(env: Env) = this
         override fun toCode(): String = "$long"
     }
@@ -54,15 +54,16 @@ sealed class Expr {
         override fun toCode(): String = "$name"
     }
 
-    // -> Form?
-    data class List(val list: kotlin.collections.List<Expr>): Expr() {
-        operator fun plus(expr: Expr): Expr.List = Expr.List(this.list.plus(expr))
+    data class List(val list: kotlin.collections.List<Expr>) : Expr() {
         override fun toCode(): String = list.joinToString(prefix = "(", separator = " ", postfix = ")", transform = Expr::toCode)
         override fun eval(env: Env): Expr {
             if (list.isEmpty()) { throw Exception("Eval empty list impossible") }
-            val proc = list.first().eval(env)
-            return when (proc) {
-                is Expr.Callable -> proc.callable.call(env, list.subList(1, list.size).map { it.eval(env) }.toTypedArray())
+            return when (val c = list.first().eval(env)) {
+                is Callable -> c.callable.call(env, list.subList(1, list.size).map { it.eval(env) }.toTypedArray())
+                is Lambda -> {
+                    val newEnvMap = c.params.zip(list.drop(1)).associateTo(mutableMapOf(), { it.first.name to it.second.eval(env) })
+                    return c.body.eval(Env(env, newEnvMap))
+                }
                 else -> throw Exception("Eval list head must be procedure")
             }
         }
@@ -73,13 +74,18 @@ sealed class Expr {
     // Q: should this be an Expr?
     // A: (for now) yes, as it still sits naturally in the resolved tree structure.
     // Alternative idea: List gets eval'd into a bound procedure. How does curry'ing fit into that?
-    data class Callable(val callable: KCallable<Expr>): Expr() {
+    data class Callable(val callable: KCallable<Expr>) : Expr() {
         override fun toCode(): String = "<procedure>"
-        override fun eval(env: Env): Expr = throw IllegalCallerException("Procedure can only be eval'd from List")
+        override fun eval(env: Env): Expr = this // throw IllegalCallerException("Callable can only be eval'd from List")
+    }
+
+    data class Lambda(val params: kotlin.collections.List<Symbol>, val body: Expr) : Expr() {
+        override fun toCode(): String = "(lambda (" + params.joinToString(" ") + ") " + body.toCode()
+        override fun eval(env: Env): Expr = this // throw IllegalCallerException("TODO Lambda cannot be eval'd") // body.eval(Env(env, mutableMapOf(*params.map { it to env.} )))
     }
 
     sealed class Form : Expr() {
-        data class Begin(val args: kotlin.collections.List<Expr>): Expr() {
+        data class Begin(val args: kotlin.collections.List<Expr>) : Expr() {
             override fun toCode(): String {
                 return args.joinToString("", "(begin", ")", transform = { " " + it.toCode() })
             }
@@ -109,9 +115,13 @@ sealed class Expr {
             }
         }
 
-        data class Quote(val expr: Expr): Expr() {
+        data class Quote(val expr: Expr) : Expr() {
             override fun toCode(): String = "(quote ${expr.toCode()}"
             override fun eval(env: Env): Expr = expr
         }
     }
 }
+
+fun Boolean.toBooleanExpr(): Expr.Boolean = if (this) Expr.Boolean.True else Expr.Boolean.False
+fun Long.toLongExpr(): Expr.LongNumeric = Expr.LongNumeric(this)
+fun Double.toDoubleExpr(): Expr.DoubleNumeric = Expr.DoubleNumeric(this)

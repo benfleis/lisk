@@ -3,6 +3,8 @@ package lispy
 import kotlin.test.*
 import lispy.Expr.*
 import org.junit.jupiter.api.*
+import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 internal class ExprTest {
     val emptyEnv = Env(null, mutableMapOf())
@@ -36,5 +38,34 @@ internal class ExprTest {
         assertEquals(
             LongNumeric(10),
             "(+ (+ 1 2 (+ 0) (- 3)) (+ 3 4 (+) (- (- 3))))".parseProgram().eval(env))
+    }
+
+    @Test
+    fun test_lambda_stuff() {
+        val env = Env(null, mutableMapOf())
+        env.registerBuiltinProcedures()
+
+        assertEquals(
+            LongNumeric(2),
+            """(begin 
+                (define incr (lambda (a) (+ a 1))) +
+                (incr 1))
+            """".parseProgram().eval(env))
+    }
+
+    @Test
+    fun test_fn_recursion() {
+        val env = Env(null, mutableMapOf())
+        env.registerBuiltinProcedures()
+
+        // define fact up front
+        assertEquals(
+            Nil,
+            "(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))".parseProgram().eval(env))
+
+        assertEquals(LongNumeric(1), "(fact 1)".parseProgram().eval(env))
+        assertEquals(LongNumeric(2), "(fact 2)".parseProgram().eval(env))
+        assertEquals(LongNumeric(6), "(fact 3)".parseProgram().eval(env))
+        assertEquals(LongNumeric(3628800), "(fact 10)".parseProgram().eval(env))
     }
 }
