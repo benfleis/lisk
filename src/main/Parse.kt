@@ -41,9 +41,15 @@ fun MutableList<Expr>.toForm(): Expr {
             }
             "define" -> {
                 if (size != 3) throw IllegalArgumentException("define requires exactly 2 args")
-                val second = get(1)
-                if (second !is Symbol) throw IllegalArgumentException("define requires symbol as first arg")
-                return Form.Define(second, get(2))
+                val symbol = get(1)
+                if (symbol !is Symbol) throw IllegalArgumentException("define requires symbol as first arg")
+                return Form.Define(symbol, get(2))
+            }
+            "set!" -> {
+                if (size != 3) throw IllegalArgumentException("set! requires exactly 2 args")
+                val symbol = get(1)
+                if (symbol !is Symbol) throw IllegalArgumentException("set! requires symbol as first arg")
+                return Form.Set(symbol, get(2))
             }
             "quote" -> {
                 if (size != 2) throw IllegalArgumentException("quote requires exactly 1 arg")

@@ -9,6 +9,7 @@ import kotlin.reflect.KCallable
 // Callers can make elegant in other ways, so that the mutable reality is not forgotten.
 data class Env(val outer: Env?, val map: MutableMap<String, Expr>) {
     fun find(K: String): Expr? = map.get(K) ?: outer?.find(K)
+    fun findEnv(K: String): Env? = if (map.contains(K)) this else outer?.findEnv(K)
     fun update(K: String, V: Expr) = map.put(K, V)
     // fun push() = Env(this, mutableMapOf())
     // fun pop() = outer
@@ -115,6 +116,12 @@ sealed class Expr {
             }
         }
 
+        data class Set(val symbol: Symbol, val value: Expr) : Form() {
+            override fun toCode(): String = "(set! ${symbol.name} $value)"
+            override fun eval(env: Env): Expr =
+                env.findEnv(symbol.name)?.update(symbol.name, value) ?: throw IllegalStateException("symbol not found")
+        }
+
         data class Quote(val expr: Expr) : Expr() {
             override fun toCode(): String = "(quote ${expr.toCode()}"
             override fun eval(env: Env): Expr = expr
@@ -122,6 +129,8 @@ sealed class Expr {
     }
 }
 
-fun Boolean.toBooleanExpr(): Expr.Boolean = if (this) Expr.Boolean.True else Expr.Boolean.False
-fun Long.toLongExpr(): Expr.LongNumeric = Expr.LongNumeric(this)
-fun Double.toDoubleExpr(): Expr.DoubleNumeric = Expr.DoubleNumeric(this)
+fun Boolean.toExpr(): Expr.Boolean = if (this) Expr.Boolean.True else Expr.Boolean.False
+fun Int.toExpr(): Expr.LongNumeric = Expr.LongNumeric(this.toLong())
+fun Long.toExpr(): Expr.LongNumeric = Expr.LongNumeric(this)
+fun Float.toExpr(): Expr.DoubleNumeric = Expr.DoubleNumeric(this.toDouble())
+fun Double.toExpr(): Expr.DoubleNumeric = Expr.DoubleNumeric(this)

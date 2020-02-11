@@ -82,8 +82,8 @@ internal fun invert(expr: Expr): Expr =
         else -> throw IllegalArgumentException("Procedure received non-Numeric argument")
     }
 
-fun add(env: Env, vararg args: Expr): Expr = args.asSequence().fold(LongNumeric(0) as Expr, ::add2)
-fun multiply(env: Env, vararg args: Expr): Expr = args.asSequence().fold(LongNumeric(1) as Expr, ::multiply2)
+fun add(env: Env, vararg args: Expr): Expr = args.fold(LongNumeric(0) as Expr, ::add2)
+fun multiply(env: Env, vararg args: Expr): Expr = args.fold(LongNumeric(1) as Expr, ::multiply2)
 
 // def: (-) -> 0, (- 1) -> -1, (- 1 1) -> 0, (- 1 1 1) -> -1, ...
 // thus 0 and 1 arg are special cases, 2+ means that lfold seeded w/ first arg
@@ -107,7 +107,7 @@ fun lessThanOrEqual(env: Env, vararg args: Expr): Expr.Boolean = when {
     args.size == 2 -> compare(args[0], args[1]) <= 0
     args.size < 2 -> throw IllegalArgumentException("Incorrect number of arguments")
     else -> (args zip args.drop(1)).find { compare(it.first, it.second) > 0 } == null
-}.toBooleanExpr()
+}.toExpr()
 
 fun Env.registerBuiltinProcedures() {
     update("+", Callable(::add))
